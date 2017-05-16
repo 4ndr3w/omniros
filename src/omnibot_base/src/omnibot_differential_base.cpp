@@ -49,7 +49,7 @@ int main(int argc, char** argv) {
       RobotPose robotPose = robot.getPose();
 
       //since all odometry is 6DOF we'll need a quaternion created from yaw
-      geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(robotPose.theta);
+      geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(robotPose.theta*(M_PI/180.0));
       //first, we'll publish the transform over tf
       geometry_msgs::TransformStamped odom_trans;
       odom_trans.header.stamp = poseTime;
@@ -79,7 +79,7 @@ int main(int argc, char** argv) {
       odom.child_frame_id = "base_link";
       odom.twist.twist.linear.x = robotPose.vx;
       odom.twist.twist.linear.y = robotPose.vy;
-      odom.twist.twist.angular.z = robotPose.vth;
+      odom.twist.twist.angular.z = robotPose.vth*(M_PI/180.0);
 
       //publish the message
       odom_pub.publish(odom);
