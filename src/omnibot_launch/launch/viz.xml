@@ -1,0 +1,4 @@
+<launch>
+    <param name="robot_description" command="cat $(find omnibot_base)/urdf/base.urdf" />
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find omnibot_launch)/rviz/slam.rviz" />
+</launch>

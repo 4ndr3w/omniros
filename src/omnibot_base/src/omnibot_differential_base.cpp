@@ -16,11 +16,17 @@ double wheelRadius = 0.0508;
 void commandVelocity(const geometry_msgs::Twist::ConstPtr& msg)
 {
   RobotVelocity wheelVelocity;
-
+/*
   wheelVelocity.front = (robotRadius * -msg->angular.z) / wheelRadius;
   wheelVelocity.back = (-robotRadius * -msg->angular.z) / wheelRadius;
   wheelVelocity.left = -(msg->linear.y + (robotRadius * -msg->angular.z)) / wheelRadius;
   wheelVelocity.right = -(msg->linear.y - (robotRadius * -msg->angular.z)) / wheelRadius;
+*/
+
+  wheelVelocity.front = -msg->angular.z;
+  wheelVelocity.back = msg->angular.z;
+  wheelVelocity.left = -(msg->linear.y - msg->angular.z);
+  wheelVelocity.right = -(msg->linear.y + msg->angular.z);
 
   robot.setOpenLoop(wheelVelocity);
 }
