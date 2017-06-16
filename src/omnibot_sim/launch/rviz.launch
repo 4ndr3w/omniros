@@ -1,0 +1,4 @@
+<launch>
+    <include file="$(find omnibot_sim)/launch/sim.launch" />
+    <node name="rviz_sim" pkg="rviz" type="rviz" args="-d $(find omnibot_sim)/rviz/sim.rviz" />
+</launch>

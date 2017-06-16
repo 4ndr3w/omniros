@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(omnibot_teleop)
+project(pathtest)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED roscpp std_msgs sensor_msgs joy)
+find_package(catkin REQUIRED)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -17,7 +17,7 @@ find_package(catkin REQUIRED roscpp std_msgs sensor_msgs joy)
 
 ################################################
 ## Declare ROS messages, services and actions ##
-###########add_execut#####################################
+################################################
 
 ## To declare and build messages, services or actions from within this
 ## package, follow these steps:
@@ -97,7 +97,7 @@ find_package(catkin REQUIRED roscpp std_msgs sensor_msgs joy)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES omnibot_teleop
+#  LIBRARIES pathtest
 #  CATKIN_DEPENDS other_catkin_pkg
 #  DEPENDS system_lib
 )
@@ -108,29 +108,29 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-include_directories(${catkin_INCLUDE_DIRS})
+# include_directories(include)
 
 ## Declare a C++ library
-# add_library(omnibot_teleop
-#   src/${PROJECT_NAME}/omnibot_teleop.cpp
+# add_library(pathtest
+#   src/${PROJECT_NAME}/pathtest.cpp
 # )
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
-# add_dependencies(omnibot_teleop ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(pathtest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
-add_executable(omnibot_teleop_node src/omnibot_teleop_node.cpp)
+# add_executable(pathtest_node src/pathtest_node.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-# add_dependencies(omnibot_teleop_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(pathtest_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(omnibot_teleop_node
-  ${catkin_LIBRARIES}
-)
+# target_link_libraries(pathtest_node
+#   ${catkin_LIBRARIES}
+# )
 
 #############
 ## Install ##
@@ -141,13 +141,13 @@ target_link_libraries(omnibot_teleop_node
 
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
-# install(PROGRAMS
-#   scripts/my_python_script
-#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
+install(PROGRAMS
+  scripts/my_python_script
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS omnibot_teleop omnibot_teleop_node
+# install(TARGETS pathtest pathtest_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -172,7 +172,7 @@ target_link_libraries(omnibot_teleop_node
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_omnibot_teleop.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_pathtest.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
