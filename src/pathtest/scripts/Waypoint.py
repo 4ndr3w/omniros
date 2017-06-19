@@ -13,15 +13,18 @@ class Waypoint:
         self.x = x
         self.y = y
     
-    def interpBetween(other, lookAhead):
+    def interpBetween(self, other, lookAhead):
         ratio = lookAhead / distance(self, other)
         return Waypoint(( 1-ratio ) * self.x + ratio*other.x, ( 1-ratio ) * self.y + ratio*other.y)
     
-    def rotateBy(theta):
-        theta = radians(theta)
-        return Waypoint(self.x*cos(theta) - self.y*sin(theta), x*sin(theta) + y*cos(theta))
+    def rotateBy(self, theta):
+        #theta = radians(theta)
+        return Waypoint(self.x*cos(theta) - self.y*sin(theta), self.x*sin(theta) + self.y*cos(theta))
 
-    def translateBy(dx, dy):
+    def translateBy(self, dx, dy):
         return Waypoint(self.x+dx, self.y+dy)
+
+    def __str__(self):
+        return "("+str(self.x)+", "+str(self.y)+")"
 
 ORIGIN = Waypoint(0, 0)

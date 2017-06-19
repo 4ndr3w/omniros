@@ -21,8 +21,13 @@ class Path:
         h.frame_id = "odom"
 
         path = ROSPath(header=h)
-        for p in self.points:
-            path.poses.append(PoseStamped(header=h,pose=Pose(position=Point(x=p.x, y=p.y))))
+
+        first = True
+        for p in self.segments:
+            if first:
+                path.poses.append(PoseStamped(header=h,pose=Pose(position=Point(x=p.start.x, y=p.start.y))))
+                first = False
+            path.poses.append(PoseStamped(header=h,pose=Pose(position=Point(x=p.stop.x, y=p.stop.y))))
         return path
 
     def addWaypoint(self, point):
@@ -58,25 +63,28 @@ class Path:
         # maybe slow
         for segment in self.segments[:]:
             perpPoint = segment.closestPointOnPath(robot)
+            print("perp point "+str(perpPoint))
+            print("seg start "+str(segment.start))
+            print("seg end "+str(segment.stop))
 
             distToStart = Waypoint.distance(segment.start, perpPoint)
             distToStop = Waypoint.distance(segment.stop, perpPoint)
-
-            if fabs(segment.distance - (distToStart+distToStart)) > epsilon:
+            print(segment.distance - (distToStart+distToStart))
+            if fabs(segment.distance - (distToStart+distToStop)) > epsilon:
                 if distToStart < distToStop:
                     perpPoint = segment.start
                 else:
                     perpPoint = segment.stop
-                
-            segment.moveStart(perpPoint)
+                    print("!!!!!!!!!!!!!moved to stop")
 
+            segment.moveStart(perpPoint)
             if segment.distance < self.lookaheadDistance:
-                if len(self.segments) != 1:
+                if len(self.segments) > 1:
                     self.segments.remove(segment)
+                    print("removed")
                     continue
                 else:
                     self.lookahead = segment.stop
-                    self.isFinished = True
                     return
             else:
                 self.lookahead = perpPoint.interpBetween(segment.stop, self.lookaheadDistance)
