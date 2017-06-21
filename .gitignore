@@ -4,3 +4,4 @@ src/CMakeLists.txt
 .catkin_workspace
 __pycache__
 .vscode
+*.pyc

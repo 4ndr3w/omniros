@@ -1,4 +1,0 @@
-<launch>
-    <param name="robot_description" command="cat $(find omnibot_sim)/urdf/base.urdf" />
-    <node name="omnibot_enable" pkg="omnibot_base" type="omnibot_enable" />
-</launch>

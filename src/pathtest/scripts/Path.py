@@ -6,6 +6,8 @@ from geometry_msgs.msg import PoseStamped, Pose, Point
 from std_msgs.msg import Header
 import rospy
 
+pointPub = rospy.Publisher('perp', ROSPath, queue_size=10)
+
 class Path:
     def __init__(self, lookaheadDistance):
         self.lookaheadDistance = lookaheadDistance
@@ -14,6 +16,7 @@ class Path:
         self.robot = Waypoint.ORIGIN
         self.lookahead = None
         self.isFinished = False
+        self.finishing = False
     
     def rosPath(self):
         h = Header()
@@ -28,7 +31,7 @@ class Path:
                 path.poses.append(PoseStamped(header=h,pose=Pose(position=Point(x=p.start.x, y=p.start.y))))
                 first = False
             path.poses.append(PoseStamped(header=h,pose=Pose(position=Point(x=p.stop.x, y=p.stop.y))))
-        return path
+        return path 
 
     def addWaypoint(self, point):
         self.insertPoint(point)
@@ -56,36 +59,39 @@ class Path:
         return length
 
     def update(self, robot):
-        epsilon = 0.0001
-
         self.robot = robot
 
-        # maybe slow
         for segment in self.segments[:]:
             perpPoint = segment.closestPointOnPath(robot)
-            print("perp point "+str(perpPoint))
-            print("seg start "+str(segment.start))
-            print("seg end "+str(segment.stop))
 
-            distToStart = Waypoint.distance(segment.start, perpPoint)
-            distToStop = Waypoint.distance(segment.stop, perpPoint)
-            print(segment.distance - (distToStart+distToStart))
-            if fabs(segment.distance - (distToStart+distToStop)) > epsilon:
-                if distToStart < distToStop:
-                    perpPoint = segment.start
-                else:
-                    perpPoint = segment.stop
-                    print("!!!!!!!!!!!!!moved to stop")
+            h = Header()
+            h.stamp = rospy.Time.now()
+            h.frame_id = "odom"
+            
+            robotToPathLink = ROSPath(header=h)
+            robotToPathLink.poses.append(PoseStamped(header=h,pose=Pose(position=Point(x=robot.x, y=robot.y))))
+            robotToPathLink.poses.append(PoseStamped(header=h,pose=Pose(position=Point(x=perpPoint.x, y=perpPoint.y))))
+            pointPub.publish(robotToPathLink)
 
             segment.moveStart(perpPoint)
+
+            if self.finishing:
+                if segment.start == segment.stop:
+                    self.isFinished = True
+                continue
+
+
             if segment.distance < self.lookaheadDistance:
+                self.lookahead = segment.stop
                 if len(self.segments) > 1:
                     self.segments.remove(segment)
-                    print("removed")
-                    continue
                 else:
-                    self.lookahead = segment.stop
-                    return
+                    # Reaching end on the last segment
+                    fakeEnd = segment.start.interpBetween(segment.stop, 2*self.lookaheadDistance+segment.distance)
+                    fakeSegment = Segment(segment.start, fakeEnd)
+                    self.lookahead = segment.stop.interpBetween(fakeEnd, self.lookaheadDistance)
+                    self.finishing = True
+                return
             else:
                 self.lookahead = perpPoint.interpBetween(segment.stop, self.lookaheadDistance)
             return
