@@ -70,6 +70,7 @@ def update(odom):
 
         if goal.x != 0:
             radius = lookahead / (2*goal.x)
+
         maxVel = math.sqrt(2 * maxAcc * path.getRemainingPathLength())
 
         vel += maxAcc * dt
