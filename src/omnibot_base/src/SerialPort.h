@@ -23,20 +23,12 @@ public:
         // Set baud rate
         tcgetattr(sock, &settings);
         cfsetospeed(&settings, baud);
-
-        settings.c_cflag     &=  ~PARENB;
-        settings.c_cflag     &=  ~CSTOPB;
-        settings.c_cflag     &=  ~CSIZE;
-        settings.c_cflag     |=  CS8;
-        settings.c_cflag     &=  ~CRTSCTS;
-        settings.c_lflag     =   0;
+        cfmakeraw(&settings);
         // Ensure blocking reads
         settings.c_cc[VMIN] = sizeof(RecvMsg);
 
         tcsetattr(sock, TCSANOW, &settings);
-        tcflush(sock, TCOFLUSH);
-
-        printf("construct\n");
+        tcflush(sock, TCIOFLUSH);
     }
 
     ~SerialPort() {
@@ -45,8 +37,7 @@ public:
 
     RecvMsg getMessage() {
         RecvMsg data;
-        int res = 0;
-        if ( read(sock, &data, sizeof(RecvMsg)) < -1 ) {
+        if ( read(sock, &data, sizeof(RecvMsg)) < 1 ) {
             perror("read()");
             exit(1);
         }
@@ -57,3 +48,5 @@ public:
         write(sock, &data, sizeof(SendMsg));
     }
 };
+
+
