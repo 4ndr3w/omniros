@@ -2,7 +2,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <termios.h>
-
+#include <stdlib.h>
 
 template <class SendMsg, class RecvMsg>
 class SerialPort {
@@ -13,6 +13,7 @@ public:
         sock = open(port, O_RDWR);
         if ( sock == -1 ) {
             perror("open()");
+            exit(1);
             return;
         }
 
@@ -22,6 +23,16 @@ public:
         // Set baud rate
         tcgetattr(sock, &settings);
         cfsetospeed(&settings, baud);
+
+        settings.c_cflag     &=  ~PARENB;
+        settings.c_cflag     &=  ~CSTOPB;
+        settings.c_cflag     &=  ~CSIZE;
+        settings.c_cflag     |=  CS8;
+        settings.c_cflag     &=  ~CRTSCTS;
+        settings.c_lflag     =   0;
+        // Ensure blocking reads
+        settings.c_cc[VMIN] = sizeof(RecvMsg);
+
         tcsetattr(sock, TCSANOW, &settings);
         tcflush(sock, TCOFLUSH);
 
@@ -34,7 +45,11 @@ public:
 
     RecvMsg getMessage() {
         RecvMsg data;
-        read(sock, &data, sizeof(RecvMsg));
+        int res = 0;
+        if ( read(sock, &data, sizeof(RecvMsg)) < -1 ) {
+            perror("read()");
+            exit(1);
+        }
         return data;
     }
 

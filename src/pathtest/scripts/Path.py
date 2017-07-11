@@ -75,22 +75,15 @@ class Path:
 
             segment.moveStart(perpPoint)
 
-            if self.finishing:
+            if len(self.segments) == 1:
                 if segment.start == segment.stop:
                     self.isFinished = True
-                continue
 
 
             if segment.distance < self.lookaheadDistance:
                 self.lookahead = segment.stop
                 if len(self.segments) > 1:
                     self.segments.remove(segment)
-                else:
-                    # Reaching end on the last segment
-                    fakeEnd = segment.start.interpBetween(segment.stop, 2*self.lookaheadDistance+segment.distance)
-                    fakeSegment = Segment(segment.start, fakeEnd)
-                    self.lookahead = segment.stop.interpBetween(fakeEnd, self.lookaheadDistance)
-                    self.finishing = True
                 return
             else:
                 self.lookahead = perpPoint.interpBetween(segment.stop, self.lookaheadDistance)

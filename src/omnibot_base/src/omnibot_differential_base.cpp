@@ -3,9 +3,10 @@
 #include <geometry_msgs/Twist.h>
 #include <nav_msgs/Odometry.h>
 
-#include "libomnibot/OmniBot.h"
+#include "SerialPort.h"
+#include "OmniBotComm.h"
 
-OmniBot robot("10.49.77.2");
+SerialPort<RobotCommand, RobotStatus> serial("/dev/ttyACM0", B9600);
 
 // Radius in meters from the center of the robot to the wheel
 double robotRadius = 0.1;
@@ -13,22 +14,15 @@ double robotRadius = 0.1;
 // Radius of the wheel
 double wheelRadius = 0.0508;
 
-void commandVelocity(const geometry_msgs::Twist::ConstPtr& msg)
-{
-  RobotVelocity wheelVelocity;
-/*
-  wheelVelocity.front = (robotRadius * -msg->angular.z) / wheelRadius;
-  wheelVelocity.back = (-robotRadius * -msg->angular.z) / wheelRadius;
-  wheelVelocity.left = -(msg->linear.y + (robotRadius * -msg->angular.z)) / wheelRadius;
-  wheelVelocity.right = -(msg->linear.y - (robotRadius * -msg->angular.z)) / wheelRadius;
-*/
+void commandVelocity(const geometry_msgs::Twist::ConstPtr& msg) {
+  RobotCommand cmd;
 
-  wheelVelocity.front = -msg->angular.z;
-  wheelVelocity.back = msg->angular.z;
-  wheelVelocity.left = -(msg->linear.y - msg->angular.z);
-  wheelVelocity.right = -(msg->linear.y + msg->angular.z);
+  cmd.frontVelocity = robotRadius * -msg->angular.z;
+  cmd.backVelocity = -robotRadius * msg->angular.z;
+  cmd.leftVelocity = msg->linear.y + (robotRadius * -msg->angular.z);
+  cmd.rightVelocity = -msg->linear.y - (robotRadius * msg->angular.z);
 
-  robot.setOpenLoop(wheelVelocity);
+  serial.sendMessage(cmd);
 }
 
 /*
@@ -47,51 +41,47 @@ int main(int argc, char** argv) {
 
   ROS_INFO("omnibot_differential_base node started");
 
-  ros::Rate rate(200);
-
+  ros::Rate rate(120);
   while ( n.ok() ) {
-    if ( !robot.stalePose() ) {
-      ros::Time poseTime = ros::Time::now();
-      RobotPose robotPose = robot.getPose();
+    ros::Time poseTime = ros::Time::now();
+    RobotStatus robotPose = serial.getMessage();
 
-      //since all odometry is 6DOF we'll need a quaternion created from yaw
-      geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(robotPose.theta*(M_PI/180.0));
-      //first, we'll publish the transform over tf
-      geometry_msgs::TransformStamped odom_trans;
-      odom_trans.header.stamp = poseTime;
-      odom_trans.header.frame_id = "odom";
-      odom_trans.child_frame_id = "base_link";
+    //since all odometry is 6DOF we'll need a quaternion created from yaw
+    geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(robotPose.heading);
+    //first, we'll publish the transform over tf
+    geometry_msgs::TransformStamped odom_trans;
+    odom_trans.header.stamp = poseTime;
+    odom_trans.header.frame_id = "odom";
+    odom_trans.child_frame_id = "base_link";
 
-      odom_trans.transform.translation.x = robotPose.x;
-      odom_trans.transform.translation.y = robotPose.y;
-      odom_trans.transform.translation.z = 0.0;
-      odom_trans.transform.rotation = odom_quat;
+    odom_trans.transform.translation.x = robotPose.x;
+    odom_trans.transform.translation.y = robotPose.y;
+    odom_trans.transform.translation.z = 0.0;
+    odom_trans.transform.rotation = odom_quat;
 
-      //send the transform
-      odom_broadcaster.sendTransform(odom_trans);
+    //send the transform
+    odom_broadcaster.sendTransform(odom_trans);
 
-      //next, we'll publish the odometry message over ROS
-      nav_msgs::Odometry odom;
-      odom.header.stamp = poseTime;
-      odom.header.frame_id = "odom";
+    //next, we'll publish the odometry message over ROS
+    nav_msgs::Odometry odom;
+    odom.header.stamp = poseTime;
+    odom.header.frame_id = "odom";
 
-      //set the position
-      odom.pose.pose.position.x = robotPose.x;
-      odom.pose.pose.position.y = robotPose.y;
-      odom.pose.pose.position.z = 0.0;
-      odom.pose.pose.orientation = odom_quat;
+    //set the position
+    odom.pose.pose.position.x = robotPose.x;
+    odom.pose.pose.position.y = robotPose.y;
+    odom.pose.pose.position.z = 0.0;
+    odom.pose.pose.orientation = odom_quat;
 
-      //set the velocity
-      odom.child_frame_id = "base_link";
-      odom.twist.twist.linear.x = robotPose.vx;
-      odom.twist.twist.linear.y = robotPose.vy;
-      odom.twist.twist.angular.z = robotPose.vth*(M_PI/180.0);
+    //set the velocity
+    odom.child_frame_id = "base_link";
+    odom.twist.twist.linear.x = robotPose.vx;
+    odom.twist.twist.linear.y = robotPose.vy;
+    odom.twist.twist.angular.z = robotPose.vth;
 
-      //publish the message
-      odom_pub.publish(odom);
+    //publish the message
+    odom_pub.publish(odom);
 
-    }
-    
     ros::spinOnce();
     rate.sleep();
   }

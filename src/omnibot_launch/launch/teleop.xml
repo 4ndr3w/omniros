@@ -1,7 +1,4 @@
 <launch>
-    <node name="joystick1" pkg="joy" type="joy_node">
-        <remap from="joy" to="joy1" />
-    </node>
-    <node name="omnibot_teleop_node" pkg="omnibot_teleop" type="omnibot_teleop_node" />
+    <node name="teleop_node" pkg="omnibot_teleop" type="teleop_node.py" />
     <include file="$(find omnibot_launch)/launch/base.xml" />
 </launch>
