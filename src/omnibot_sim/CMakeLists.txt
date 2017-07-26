@@ -118,6 +118,7 @@ include_directories(${catkin_INCLUDE_DIRS})
 
 ## Declare a C++ executable
 add_executable(omnibot_sim src/omnibot_sim.cpp)
+add_dependencies(omnibot_sim omnibot_sim_generate_messages_cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above

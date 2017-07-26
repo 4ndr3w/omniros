@@ -2,6 +2,7 @@ from Waypoint import Waypoint, distance, isBetween
 import sys
 import numpy
 from math import fabs
+from geometry_msgs.msg import PoseStamped, Pose, Point
 
 class Segment:
     def __init__(self, start, stop):
@@ -10,10 +11,20 @@ class Segment:
 
         self.distance = distance(start, stop)
 
+    def addToROSPath(self, path, h):
+        path.append(PoseStamped(header=h,pose=Pose(position=Point(x=self.start.x, y=self.start.y))))
+        path.append(PoseStamped(header=h,pose=Pose(position=Point(x=self.stop.x, y=self.stop.y))))
+
+
     def moveStart(self, start):
         self.start = start
         self.distance = distance(start, self.stop)
         #print("segment moved to "+str(start.x)+" "+str(start.y)+"  new distance is "+str(self.distance))
+    
+    def slope(self):
+        if self.start.x == self.stop.x:
+            return None
+        return (self.start.y - self.stop.y) / (self.start.x - self.stop.x)
 
     def closestPointOnPath(self, p):
         perpPoint = self.closestPerpendicularPoint(p)

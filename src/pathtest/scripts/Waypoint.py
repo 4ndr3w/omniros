@@ -3,6 +3,9 @@ from math import sqrt, pow, fabs, radians, degrees, sin, cos
 def distance(a,b):
     return sqrt(pow(a.x-b.x, 2)+pow(a.y-b.y, 2))
 
+def midpoint(a,b):
+    return Waypoint((a.x+b.x)/2.0, (a.y+b.y)/2.0)
+
 def isBetween(a, b, c):
     "Return true iff point c intersects the line segment from a to b."
     return (collinear(a, b, c)

@@ -26,7 +26,7 @@ pub = rospy.Publisher('cmd_velocity', Twist, queue_size=10)
 while not rospy.is_shutdown():
     vel = js.get_axis(1)
     omega = js.get_axis(3)
-    
+
     vel *= -0.4
     omega *= -3.14
 
