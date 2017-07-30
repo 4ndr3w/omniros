@@ -9,5 +9,5 @@ include_directories(
 )
 
 
-add_executable(omnibot_differential_base src/omnibot_differential_base.cpp)
+add_executable(omnibot_differential_base src/omnibot_differential_base.cpp src/fletcher.cpp)
 target_link_libraries(omnibot_differential_base ${catkin_LIBRARIES} atomic pthread)

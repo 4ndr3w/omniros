@@ -67,10 +67,15 @@ class Path:
             
 
             tangentPoint = tangentCircle.intersection(turnCircle)[0]
+            print("circle params")
+            print(circleOrigin)
+            print(incomingRadius)
+            print(prev.stop)
+            print(tangentPoint)
 
-            
+
             self.segments.append(CircleSegment(circleOrigin, incomingRadius, turnCircle.angleOf(prev.stop), turnCircle.angleOf(tangentPoint)))
-            #self.segments.append(CircleSegment(circleOrigin, incomingRadius, 0, 2*3.14))
+            #self.segments.append(CircleSegment(circleOrigin, incomingRadius, 0.8, 1.1))
             #self.segments.append(CircleSegment(tangentCircleOrigin, tangentCircleRadius, 0, 2*3.14))
             
 

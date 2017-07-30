@@ -7,6 +7,8 @@ struct RobotCommand {
   float rightVelocity;
   float frontVelocity;
   float backVelocity;
+
+  uint32_t checksum;
 };
 
 struct RobotStatus {
@@ -17,6 +19,8 @@ struct RobotStatus {
   float vx;
   float vy;
   float vth;
+
+  uint32_t checksum;
 };
 
 #endif

@@ -1,0 +1,12 @@
+def rmo(x, y, len):
+    return x*len+y
+
+def rmo2point(idx, len):
+    x = floor(idx / len)
+    y = idx - (x*len)
+    return (x,y)
+
+
+for x in range(10):
+    for y in range(10):
+        print((x,y))

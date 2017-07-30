@@ -2,30 +2,32 @@
 
 import rospy
 from geometry_msgs.msg import Twist, Vector3
-import pygame
+#import pygame
 
-pygame.display.init()
-pygame.joystick.init()
+#pygame.display.init()
+#pygame.joystick.init()
 
 
 rospy.init_node('teleop')
 rate = rospy.Rate(50)
 
-js = pygame.joystick.Joystick(0)
-js.init()
+#js = pygame.joystick.Joystick(0)
+#js.init()
 
-while not js.get_init():
-    print("waiting for js init")
+#while not js.get_init():
+#    print("waiting for js init")
 
-if not js:
-    print("No joystick found")
-    exit()
+#if not js:
+#    print("No joystick found")
+#    exit()
 
 pub = rospy.Publisher('cmd_velocity', Twist, queue_size=10)
 
 while not rospy.is_shutdown():
-    vel = js.get_axis(1)
-    omega = js.get_axis(3)
+    #vel = js.get_axis(1)
+    #omega = js.get_axis(3)
+
+    vel = omega = 0
 
     vel *= -0.4
     omega *= -3.14
@@ -36,5 +38,5 @@ while not rospy.is_shutdown():
 
     pub.publish(msg)
 
-    pygame.event.pump()
+    #pygame.event.pump()
     rate.sleep()

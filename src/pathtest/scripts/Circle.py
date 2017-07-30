@@ -1,4 +1,4 @@
-from math import sin, cos, acos, asin, pi, sqrt, fabs
+from math import sin, cos, atan2, pi, sqrt, fabs
 from Waypoint import Waypoint
 
 class Circle:
@@ -9,8 +9,10 @@ class Circle:
     def pointAt(self, theta):
         return Waypoint(cos(theta)*self.radius-self.origin.x, sin(theta)*self.radius-self.origin.y)
 
+
     def angleOf(self, a):
-        return acos((a.x+self.origin.x)/self.radius)
+        print ("angleOf: "+str(Waypoint(a.y + self.origin.y, a.x + self.origin.x)))
+        return atan2(a.y + self.origin.y, a.x + self.origin.x)
 
     def intersection(self, other):
         if isinstance(other, Circle):
@@ -56,4 +58,3 @@ class Circle:
                 Waypoint(solveX1, solveY1),
                 Waypoint(solveX2, solveY2)
             ]
-

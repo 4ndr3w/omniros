@@ -5,6 +5,7 @@
 
 #include "SerialPort.h"
 #include "OmniBotComm.h"
+#include "fletcher.h"
 
 SerialPort<RobotCommand, RobotStatus> serial("/dev/ttyACM0", B9600);
 
@@ -21,6 +22,12 @@ void commandVelocity(const geometry_msgs::Twist::ConstPtr& msg) {
   cmd.backVelocity = -robotRadius * msg->angular.z;
   cmd.leftVelocity = msg->linear.y + (robotRadius * -msg->angular.z);
   cmd.rightVelocity = -msg->linear.y - (robotRadius * msg->angular.z);
+
+  cmd.checksum = 0;
+
+  uint32_t checksum = fletcher32(&cmd, sizeof(RobotCommand));
+
+  cmd.checksum = checksum;
 
   serial.sendMessage(cmd);
 }
@@ -44,44 +51,55 @@ int main(int argc, char** argv) {
   ros::Rate rate(120);
   while ( n.ok() ) {
     ros::Time poseTime = ros::Time::now();
-    RobotStatus robotPose = serial.getMessage();
 
-    //since all odometry is 6DOF we'll need a quaternion created from yaw
-    geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(robotPose.heading);
-    //first, we'll publish the transform over tf
-    geometry_msgs::TransformStamped odom_trans;
-    odom_trans.header.stamp = poseTime;
-    odom_trans.header.frame_id = "odom";
-    odom_trans.child_frame_id = "base_link";
+    if ( serial.hasMessage() ) {
+      RobotStatus robotPose = serial.getMessage();
 
-    odom_trans.transform.translation.x = robotPose.x;
-    odom_trans.transform.translation.y = robotPose.y;
-    odom_trans.transform.translation.z = 0.0;
-    odom_trans.transform.rotation = odom_quat;
+      uint32_t checksum = robotPose.checksum;
+      robotPose.checksum = 0;
+      printf("checksum is %d  -   %d\n", checksum, fletcher32(&robotPose, sizeof(RobotStatus)));
+      if ( fletcher32(&robotPose, sizeof(RobotStatus)) == checksum ) {
+        //since all odometry is 6DOF we'll need a quaternion created from yaw
+        geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(robotPose.heading);
+        //first, we'll publish the transform over tf
+        geometry_msgs::TransformStamped odom_trans;
+        odom_trans.header.stamp = poseTime;
+        odom_trans.header.frame_id = "odom";
+        odom_trans.child_frame_id = "base_link";
 
-    //send the transform
-    odom_broadcaster.sendTransform(odom_trans);
+        odom_trans.transform.translation.x = robotPose.x;
+        odom_trans.transform.translation.y = robotPose.y;
+        odom_trans.transform.translation.z = 0.0;
+        odom_trans.transform.rotation = odom_quat;
 
-    //next, we'll publish the odometry message over ROS
-    nav_msgs::Odometry odom;
-    odom.header.stamp = poseTime;
-    odom.header.frame_id = "odom";
+        //send the transform
+        odom_broadcaster.sendTransform(odom_trans);
 
-    //set the position
-    odom.pose.pose.position.x = robotPose.x;
-    odom.pose.pose.position.y = robotPose.y;
-    odom.pose.pose.position.z = 0.0;
-    odom.pose.pose.orientation = odom_quat;
+        //next, we'll publish the odometry message over ROS
+        nav_msgs::Odometry odom;
+        odom.header.stamp = poseTime;
+        odom.header.frame_id = "odom";
 
-    //set the velocity
-    odom.child_frame_id = "base_link";
-    odom.twist.twist.linear.x = robotPose.vx;
-    odom.twist.twist.linear.y = robotPose.vy;
-    odom.twist.twist.angular.z = robotPose.vth;
+        //set the position
+        odom.pose.pose.position.x = robotPose.x;
+        odom.pose.pose.position.y = robotPose.y;
+        odom.pose.pose.position.z = 0.0;
+        odom.pose.pose.orientation = odom_quat;
 
-    //publish the message
-    odom_pub.publish(odom);
+        //set the velocity
+        odom.child_frame_id = "base_link";
+        odom.twist.twist.linear.x = robotPose.vx;
+        odom.twist.twist.linear.y = robotPose.vy;
+        odom.twist.twist.angular.z = robotPose.vth;
 
+        //publish the message
+        odom_pub.publish(odom);
+      }
+      else {
+        ROS_INFO("Checksum failed!");
+        serial.flush();
+      }
+    }
     ros::spinOnce();
     rate.sleep();
   }
