@@ -2,6 +2,6 @@
 #define FLETCHER_H
 #include <stdint.h>
 
-uint32_t fletcher32( void* data, int words );
+uint16_t fletcher16( void* d, int words );
 
 #endif

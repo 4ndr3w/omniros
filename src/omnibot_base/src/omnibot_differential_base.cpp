@@ -25,7 +25,7 @@ void commandVelocity(const geometry_msgs::Twist::ConstPtr& msg) {
 
   cmd.checksum = 0;
 
-  uint32_t checksum = fletcher32(&cmd, sizeof(RobotCommand));
+  uint32_t checksum = fletcher16(&cmd, sizeof(RobotCommand));
 
   cmd.checksum = checksum;
 
@@ -57,8 +57,7 @@ int main(int argc, char** argv) {
 
       uint32_t checksum = robotPose.checksum;
       robotPose.checksum = 0;
-      printf("checksum is %d  -   %d\n", checksum, fletcher32(&robotPose, sizeof(RobotStatus)));
-      if ( fletcher32(&robotPose, sizeof(RobotStatus)) == checksum ) {
+      if ( fletcher16(&robotPose, sizeof(RobotStatus)) == checksum ) {
         //since all odometry is 6DOF we'll need a quaternion created from yaw
         geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(robotPose.heading);
         //first, we'll publish the transform over tf
