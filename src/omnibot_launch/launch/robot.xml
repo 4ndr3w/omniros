@@ -1,3 +1,4 @@
 <launch>
     <include file="$(find omnibot_launch)/launch/base.xml" />
+    <include file="$(find omnibot_launch)/launch/slam.xml" />
 </launch>

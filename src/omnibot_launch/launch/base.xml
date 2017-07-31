@@ -1,9 +1,4 @@
 <launch>
     <param name="robot_description" command="cat $(find omnibot_base)/urdf/base.urdf" />
 	<node name="omnibot_differential_base" pkg="omnibot_base" type="omnibot_differential_base" />
-
-    <node name="rplidarNode" pkg="rplidar_ros" type="rplidarNode">
-        <param name="frame_id" type="string" value="laser" />
-    </node>
-    <node name="scan_to_base_pub" pkg="tf" type="static_transform_publisher" args="0 0 0.5 1.57 0 0 base_link laser 100" />
 </launch>

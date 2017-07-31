@@ -1,0 +1,7 @@
+<launch>
+    <node name="rplidarNode" pkg="rplidar_ros" type="rplidarNode">
+        <param name="frame_id" type="string" value="laser" />
+    </node>
+    <node name="scan_to_base_pub" pkg="tf" type="static_transform_publisher" args="0 0 0.5 1.57 0 0 base_link laser 100" />
+    <node name="gmapping" pkg="gmapping" type="slam_gmapping" />
+</launch>
