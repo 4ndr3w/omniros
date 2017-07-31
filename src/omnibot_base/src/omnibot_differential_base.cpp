@@ -95,7 +95,7 @@ int main(int argc, char** argv) {
         odom_pub.publish(odom);
       }
       else {
-        ROS_INFO("Checksum failed!");
+        ROS_ERROR("Checksum failed");
         serial.flush();
       }
     }
